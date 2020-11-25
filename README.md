@@ -36,7 +36,7 @@ http://www.wiinupro.com/
      * **1.3.5.** **UNCHECK** the `Generic Gamepad Configuration Support` checkbox.
      
 * **2.** Setup the required virtual Xbox gamepad driver.
-  * **2.1.** Download the [SCP Driver](https://github.com/Meowmaritus/WiitarThing/releases/download/v2.7/WiitarThing_SCP_Driver.zip).
+  * **2.1.** Download the [SCP Driver](https://github.com/CristobalPenaloza/WiitarThing/releases/download/v2.9/WiitarThing_SCP_Driver.zip).
   * **2.2.** Extract it.
   * **2.3.** Run the ScpDriver.exe program **as an administrator**.
   * **2.4.** **CHECK** the `Configure Service` checkbox at the bottom.
@@ -44,7 +44,7 @@ http://www.wiinupro.com/
   * **2.6.** **CHECK** the `Force Install` checkbox at the bottom.
   * **2.7.** Click the "Install" button and wait for installation to finish.
 * **3.** Get WiitarThing
-  * **3.1.** Visit [the "Releases" tab](https://github.com/Meowmaritus/WiitarThing/releases). 
+  * **3.1.** Visit [the "Releases" tab](https://github.com/CristobalPenaloza/WiitarThing/releases/). 
   * **3.2.** Download the `WiitarThing.<version>.zip` file for the latest version released.
   * **3.3.** Extract the ZIP anywhere.
 
