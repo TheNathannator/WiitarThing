@@ -249,7 +249,7 @@ namespace WiitarThing
                     {
                         if (thingy.Value.Device.Connected || thingy.Value.Device.DataStream.Open())
                         {
-                            thingy.Value.targetXDevice = target + 1;
+                            thingy.Value.targetXDevice = target;
                             thingy.Value.ConnectionState = DeviceState.Connected_XInput;
                             thingy.Value.Device.BeginReading();
                             thingy.Value.Device.GetStatus();
@@ -280,7 +280,7 @@ namespace WiitarThing
                 {
                     if (d.Value.Device.Connected || d.Value.Device.DataStream.Open())
                     {
-                        d.Value.targetXDevice = target + 1;
+                        d.Value.targetXDevice = target;
                         d.Value.ConnectionState = DeviceState.Connected_XInput;
                         d.Value.Device.BeginReading();
                         d.Value.Device.GetStatus();
