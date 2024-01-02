@@ -428,6 +428,7 @@ namespace NintrollerLib
                 //Right = Joy.X > 0.7f;
 
                 byte currentWhammyValue = (byte)(data[offset + 3] & 0x1F);
+                //Nintroller.Log(BitConverter.ToString(new byte[] { currentWhammyValue }));
 
                 if (currentWhammyValue < CALIB_Whammy_Min)
                     CALIB_Whammy_Min = currentWhammyValue;

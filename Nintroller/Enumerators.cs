@@ -98,7 +98,12 @@
         IR_Step2,
         IR_Step3,
         IR_Step4,
-        IR_Step5
+        IR_Step5,
+        EncryptionSetup_Step0, // so that the calculation: (AcknowledgementType)((int)_ackType - 1) will hold for the very first step as well (to inform that it failed)
+        EncryptionSetup_Step1,
+        EncryptionSetup_Step2,
+        EncryptionSetup_Step3,
+        EncryptionSetup_Step4
     }
 
     internal enum StatusType
