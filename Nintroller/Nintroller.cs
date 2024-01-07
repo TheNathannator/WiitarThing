@@ -680,7 +680,7 @@ namespace NintrollerLib
                     /* HOW I FOUND THE VALUE 0x4D:
                        The assumption was that the Frontman encrypts its data incorrectly for some reason, but it still uses the transformation:
                        encrypted_byte = (decrypted_byte - table2[address%8]) ^ table1[address%8].
-                       After diving a little into some implementions of the table generation process used by extension controllers to encrypt their data:
+                       After diving a little into some implementations of the table generation process used by extension controllers to encrypt their data:
                        https://github.com/bootsector/wii-retropad-adapter/blob/master/src/wii-retropad-adapter/WMCrypt.cpp
                        https://github.com/xerpi/fakemote/blob/main/source/wiimote_crypto.c
                        https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/Core/HW/WiimoteEmu/Encryption.cpp
