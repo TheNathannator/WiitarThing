@@ -2,22 +2,22 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="WiitarThing.PropWindow"
-        Title="Properties" Height="281" Width="352" Background="{DynamicResource BrushSocialBlue}" Icon="../Images/WiinUSoft_Icon32.png"
+        Title="Properties" Height="147.066" Width="352" Background="{DynamicResource BrushSocialBlue}" Icon="../Images/WiinUSoft_Icon32.png"
     ResizeMode="NoResize">
     <Grid>
         <Label Content="Device Name:" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top" Height="26"/>
         <Label Content="Auto Connect:" HorizontalAlignment="Left" Margin="10,42,0,0" VerticalAlignment="Top" Height="26"/>
-        <Label Content="Default Profile:" 
+        <Label Content="Default Profile:" Visibility="Collapsed"
                HorizontalAlignment="Left" Margin="10,74,0,0" VerticalAlignment="Top" Height="26"/>
-        <Label Content="Rumble Intensity:" 
+        <Label Content="Rumble Intensity:" Visibility="Collapsed"
                HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top" Height="26"/>
-        <Label Content="Calibration:" 
+        <Label Content="Calibration:" Visibility="Collapsed"
                HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Height="26"/>
         <TextBox x:Name="nameInput" HorizontalAlignment="Left" Height="26" Margin="120,13,0,0" VerticalAlignment="Top" Width="180" Background="{DynamicResource BrushAntemWhite}" VerticalContentAlignment="Center" TextChanged="nameInput_TextChanged"/>
-        <TextBox x:Name="defaultInput"
+        <TextBox x:Name="defaultInput" Visibility="Collapsed"
                HorizontalAlignment="Left" Height="26" Margin="120,74,0,0" VerticalAlignment="Top" Width="180" Background="{DynamicResource BrushAntemWhite}" VerticalContentAlignment="Center" TextChanged="defaultInput_TextChanged"/>
         <CheckBox x:Name="autoCheckbox" Content="" HorizontalAlignment="Left" Margin="115,50,0,0" VerticalAlignment="Top" Background="{DynamicResource BrushAntemWhite}" Height="18" Padding="4,0,0,0" Click="autoCheckbox_Click" Visibility="Hidden"/>
-        <Button x:Name="defaultBtn"
+        <Button x:Name="defaultBtn" Visibility="Collapsed"
                Content="..." Margin="305,74,0,0" VerticalAlignment="Top" Background="{DynamicResource ButonFillBrush1}" BorderBrush="{DynamicResource BrushAntemBlue}" FontWeight="Bold" Foreground="{DynamicResource BrushAntemWhite}" Height="26" HorizontalAlignment="Left" Width="27" Click="defaultBtn_Click"/>
         <Button x:Name="saveBtn" Content="Save" Margin="268,0,0,12" Background="{DynamicResource ButonFillBrush1}" BorderBrush="{DynamicResource BrushAntemBlue}" FontWeight="Bold" Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}" HorizontalAlignment="Left" Width="64" Click="saveBtn_Click" Height="26" VerticalAlignment="Bottom"/>
         <Button x:Name="cancelBtn" Content="Cancel" Margin="199,0,0,12" Background="{DynamicResource ButonFillBrush1}" BorderBrush="{DynamicResource BrushAntemBlue}" FontWeight="Bold" Foreground="{DynamicResource {x:Static SystemColors.MenuTextBrushKey}}" HorizontalAlignment="Left" Width="64" Click="cancelBtn_Click" Height="26" VerticalAlignment="Bottom"/>
@@ -29,7 +29,7 @@
             <System:String>Controller 4</System:String>
             <System:String>First Available</System:String>
         </ComboBox>
-        <ComboBox
+        <ComboBox Visibility="Collapsed"
                x:Name="rumbleSelection" HorizontalAlignment="Left" Margin="120,108,0,0" VerticalAlignment="Top" Width="180" SelectedIndex="2" SelectionChanged="Rumble_SelectionChanged">
             <System:String>Disabled</System:String>
             <System:String>Low</System:String>
@@ -37,7 +37,7 @@
             <System:String>High</System:String>
             <System:String>Maximum</System:String>
         </ComboBox>
-        <ComboBox
+        <ComboBox Visibility="Collapsed"
                x:Name="calibrationSelection" HorizontalAlignment="Left" Margin="120,140,0,0" VerticalAlignment="Top" Width="180" SelectedIndex="0" SelectionChanged="Calibration_SelectionChanged" DropDownClosed="calibrationSelection_DropDownClosed">
             <System:String>Default</System:String>
             <System:String>Minimum</System:String>
@@ -45,11 +45,11 @@
             <System:String>Extra</System:String>
             <System:String>Custom</System:String>
         </ComboBox>
-        <Label Content="IR Pointer Off"
+        <Label Content="IR Pointer Off" Visibility="Collapsed"
                HorizontalAlignment="Left" Margin="10,165,0,0" VerticalAlignment="Top" Height="24" Width="105"/>
-        <Label Content="Screen Behavior:"
+        <Label Content="Screen Behavior:" Visibility="Collapsed"
                HorizontalAlignment="Left" Margin="10,180,0,0" VerticalAlignment="Top" Height="25" Width="105"/>
-        <ComboBox
+        <ComboBox Visibility="Collapsed"
                x:Name="pointerSelection" HorizontalAlignment="Left" Margin="120,174,0,0" VerticalAlignment="Top" Width="180" SelectedIndex="0" SelectionChanged="pointerSelection_SelectionChanged">
             <System:String>Center</System:String>
             <System:String>Snap to X Axis</System:String>

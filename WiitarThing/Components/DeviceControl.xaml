@@ -59,8 +59,5 @@
         <Button x:Name="btnDetatch" HorizontalAlignment="Left" Margin="185,36,0,0" VerticalAlignment="Top" Width="79" Height="38" BorderBrush="{DynamicResource BrushAntemBlue}" BorderThickness="2" FontSize="10" Click="btnDetatch_Click" Visibility="Hidden" ToolTip="Detatch" Background="{DynamicResource ButonFillBrush1}" FontWeight="Bold">
             DISCONNECT
         </Button>
-        <Button x:Name="btnReadGuitar" HorizontalAlignment="Left" Margin="12,36,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.462,-0.06" Width="59" Click="btnReadGuitar_Click">
-            <TextBlock TextWrapping="Wrap" Text="Read 0xA40008" TextAlignment="Center"/>
-        </Button>
     </Grid>
 </UserControl>

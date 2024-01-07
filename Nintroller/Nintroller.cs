@@ -53,10 +53,6 @@ namespace NintrollerLib
         private StatusType          _statusType = StatusType.DiscoverExtension; // initial value was originally StatusType.Unknown, but it's a good idea to be able to distinguish the first received status report from subsequent ones
         private ReadReportType      _readType   = ReadReportType.Unknown;
 
-#if DEBUG
-        // boolean flag indicating whether the "Read 0xA40008" button was pressed and waiting for a response (declared public so that it's accessible in DeviceControl.xaml.cs) 
-        public bool _readGuitarInfo = false;
-#endif
         // boolean flag indicating whether guitar encryption has been fully set up and guitar bytes should be decrypted in every data report received
         private bool _encryptionEnabled = false;
         #endregion
@@ -495,7 +491,7 @@ namespace NintrollerLib
         }
 
         // Request data from the device's memory
-        public void ReadMemory(int address, short size) // made public in order to call it from DeviceControl.xaml.cs
+        private void ReadMemory(int address, short size)
         {
             byte[] buffer = new byte[7];
 
@@ -587,18 +583,6 @@ namespace NintrollerLib
             buffer[4] = (byte)  (address & 0x000000FF);
             buffer[5] = (byte)data.Length;
 
-            /* In the GH3 Bluetooth exchange, it seemed to me as if the game actually sent 6 bytes in the last block of the encryption key rather than 4, while setting
-               the size field of the write command to 4. This is a (now redundant) patch I added in order to emulate that, aiming to mimic the exchange as accurately
-               as possible to make the Nyko Frontman work.
-            */
-            //if (address == 0x04a4004C)
-            //{
-            //    buffer[5] = (byte)4;
-            //} else
-            //{
-            //    buffer[5] = (byte)data.Length;
-            //}
-
             Array.Copy(data, 0, buffer, 6, Math.Min(data.Length, 16));
 
             SendData(buffer);
@@ -622,16 +606,6 @@ namespace NintrollerLib
             SendData(buffer);
         }
 
-        // I originally used a function to setup guitar encryption, when I realized it won't work if we write to memory before a previous write has been acknowledged
-        //private void SetupGuitarEncryption()
-        //{
-        //    WriteToMemory(Constants.REGISTER_EXTENSION_INIT_1, new byte[] { 0xAA });
-        //    WriteToMemory(0x04a40040, new byte[] { 0x41, 0xD7, 0xCE, 0x7D, 0x93, 0x61 });
-        //    WriteToMemory(0x04a40046, new byte[] { 0x00, 0x16, 0x27, 0xF4, 0x31, 0xB9 });
-        //    WriteToMemory(0x04a4004C, new byte[] { 0x18, 0xC9, 0x12, 0xA8 });
-        //    ApplyReportingType(InputReport.BtnsAccIRExt, true);
-        //}
-
         // This function decrypts the 6 guitar bytes in the given buffer starting at the given offset, assuming the encryption key is 16 zero bytes.
         private void GuitarDecryptBuffer(byte[] data, int offset)
         {
@@ -648,8 +622,6 @@ namespace NintrollerLib
             */
             byte decrypted = (byte)(((data[offset + 4] ^ 0x97) + 0x97) & 0xFF);
             bool useCommonValue = (data[offset + 4] != 0xFF) && ((decrypted & 0xAB) == 0xAB);
-            // all possible encrypted values in the 5th byte: 0xFF, 0x3F, 0xEF, 0xE3, 0x2F, 0xD3, 0x23, 0x13
-            // values that decrypt incorrectly when using 0x97 (the common value): 0x3F, 0xEF, 0xE3, 0x2F, 0xD3, 0x23, 0x13
 
             for (int i = 0; i < 6; i++)
             {
@@ -659,24 +631,6 @@ namespace NintrollerLib
                 }
                 else // Nyko Frontman
                 {
-                    // ATTEMPT #1
-                    //data[offset + i] = (byte)(((data[offset + i] ^ 0x97) + 0x97) & 0xFF);
-
-                    // ATTEMPT #2
-                    //int decrypted = (data[offset + i] ^ 0x97) + 0x97;
-                    //data[offset + i] = (byte)(0xFF - Math.Abs(decrypted - 0xFF));
-
-                    // ATTEMPT #3
-                    //sbyte temp = (sbyte)(data[offset + i]);
-                    //temp = (sbyte)(temp ^ 0x97);
-                    //temp = (sbyte)(temp + 0x97);
-                    //data[offset + i] = (byte)temp;
-
-                    // ATTEMPT #4
-                    //int high = (data[offset + i] ^ 0x97) + 0x97;
-                    //int low = (data[offset + i] ^ 0x17) + 0x17;
-                    //data[offset + i] = (byte)((low + high) >> 1);
-
                     /* HOW I FOUND THE VALUE 0x4D:
                        The assumption was that the Frontman encrypts its data incorrectly for some reason, but it still uses the transformation:
                        encrypted_byte = (decrypted_byte - table2[address%8]) ^ table1[address%8].
@@ -696,14 +650,6 @@ namespace NintrollerLib
                     data[offset + i] = (byte)(((data[offset + i] ^ 0x4D) + 0x4D) & 0xFF);
                 }
             }
-
-            // turning off all bits containing data not affected by the inputs (only useful for seeing just the input values in debug prints, but now unnecessary)
-            //data[offset] &= 0x3F;
-            //data[offset + 1] &= 0x3F;
-            //data[offset + 2] &= 0x1F;
-            //data[offset + 3] &= 0x1F;
-            //data[offset + 4] &= 0x54;
-            //data[offset + 5] &= 0xF9;
 
             Log("Decrypted guitar bytes: " + BitConverter.ToString(data, offset, 6));
         }
@@ -740,7 +686,7 @@ namespace NintrollerLib
                             /* Based on observations, while the Nyko Frontman is connected to the Wiimote (before being configured properly by WiitarThing),
                                every few seconds the Wiimote sends status reports where the extension controller bit is alternating between 0 and 1
                                from one report to another. These contradicting reports disrupt the extension discovery process, causing it to toggle between
-                               a Wiimote and a Guitar, all of this while the guitar remains physically connected (the connection is not loose or anything).
+                               a Wiimote and a Guitar, all of this while the guitar remains physically connected.
                                They also disrupt further initialization steps (e.g. a status report claiming no extension is connected arrives while setting up guitar
                                encryption). To summarize, it's best to ignore a status report in two cases:
                                1. It's not the report that is specifically requested right after connecting the device (determined by _statusType == StatusType.Unknown,
@@ -837,26 +783,6 @@ namespace NintrollerLib
                     bool noError = (report[3] & 0xF) == 0;
                     if (!noError)
                         Log("Possible ReadMem Error: " + (report[3] & 0x0F).ToString());
-
-#if DEBUG
-                    /* In case we know that the "Read 0xA40008" button was pressed and waiting for a response, immediately send the current ReadMem report
-                       via the StateUpdate event handler and do nothing more.
-                    */
-                    if (_readGuitarInfo == true)
-                    {
-                        _state.Update(report);
-                        var arg = new NintrollerStateEventArgs(_currentType, _state, BatteryLevel);
-                        try
-                        {
-                            StateUpdate(this, arg);
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine("State Update Exception: " + ex.ToString());
-                        }
-                        return;
-                    }
-#endif
 
                     switch(_readType)
                     {
@@ -1128,15 +1054,6 @@ namespace NintrollerLib
 
                         default:
                             Log("Unrecognized Read Memory report");
-
-                            /* As part of testing whether reading the 32-byte calibration data is the last necessary step to configure the Nyko Frontman guitar,
-                               I made sure to request data streaming after reading the last 16 bytes (since the data begins at offset 0x20, the last 16 bytes
-                               begin at offset 0x20+0x10=0x30).
-                            */
-                            //if (report[5] == 0x30)
-                            //{
-                            //    ApplyReportingType(InputReport.BtnsAccIRExt, true);
-                            //}
                             break;
                     }
 #endregion
@@ -1352,30 +1269,20 @@ namespace NintrollerLib
                         // The encryption key used is 16 zero bytes, since it makes decryption easier as seen in GuitarDecryptBuffer()
                         case AcknowledgementType.EncryptionSetup_Step1:
                             _ackType = AcknowledgementType.EncryptionSetup_Step2;
-                            //WriteToMemory(0x04a40040, new byte[] { 0x41, 0xD7, 0xCE, 0x7D, 0x93, 0x61 }); // first 6-byte block of the key observed in GH3 Bluetooth traffic, which was initially used
                             WriteToMemory(0x04a40040, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }); // writing first 6-byte block of the encryption key
                             break;
                         case AcknowledgementType.EncryptionSetup_Step2:
                             _ackType = AcknowledgementType.EncryptionSetup_Step3;
-                            //WriteToMemory(0x04a40046, new byte[] { 0x00, 0x16, 0x27, 0xF4, 0x31, 0xB9 }); // second 6-byte block of the key observed in GH3 Bluetooth traffic, which was initially used
                             WriteToMemory(0x04a40046, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }); // writing second 6-byte block of the encryption key
                             break;
                         case AcknowledgementType.EncryptionSetup_Step3:
                             _ackType = AcknowledgementType.EncryptionSetup_Step4;
-                            //WriteToMemory(0x04a4004C, new byte[] { 0x18, 0xC9, 0x12, 0xA8 }); // last 4 bytes of the key observed in GH3 Bluetooth traffic, which was initially used
                             WriteToMemory(0x04a4004C, new byte[] { 0x00, 0x00, 0x00, 0x00 }); // writing last 4 bytes of the encryption key
                             break;
                         case AcknowledgementType.EncryptionSetup_Step4:
                             _ackType = AcknowledgementType.NA;
                             EncryptionEnabled = true; // having completed encryption setup, we turn on the flag to start decrypting guitar bytes in the incoming data reports
                             ApplyReportingType(InputReport.BtnsAccIRExt, true); // requesting the Wiimote to stream 0x37 data reports (the report type observed in GH3 Bluetooth traffic)
-
-                            /* In the GH3 Bluetooth exchange, the game also requested calibration data from the Wiimote before requesting data streams and after
-                               setting up encryption. I added this step as well, aiming to mimic the exchange as accurately as possible to make the Nyko Frontman work.
-                               Eventually I figured that this step isn't mandatory.
-                            */
-                            //_readType = ReadReportType.Unknown; // to fall on the default case at the switch(_readType) statement
-                            //ReadMemory(Constants.REGISTER_EXTENSION_CALIBRATION, 32); // the 32 bytes always arrive in two separate 16-byte reports of 0x21
                             break;
 
                         default:

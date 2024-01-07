@@ -156,15 +156,6 @@ namespace WiitarThing
                 e.state.DebugViewActive = false;
                 DebugViewActivate();
             }
-
-            /* If Nintroller called StateUpdate to inform of a "read memory" report (starting with 0x21), given that the "Read 0xA40008"
-               button was pressed and waiting for a response, then we show the response in a MessageBox.
-            */
-            if (Device._readGuitarInfo && BitConverter.ToString(((Guitar)e.state).DebugLastData).StartsWith("21"))
-            {
-                Device._readGuitarInfo = false; // the button is no longer waiting for a response
-                MessageBox.Show(BitConverter.ToString(((Guitar)e.state).DebugLastData), "Test", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
         }
 
         private void DebugViewActivate()
@@ -262,7 +253,6 @@ namespace WiitarThing
                     //btnConfig.Visibility    = Visibility.Hidden;
                     btnDetatch.Visibility   = Visibility.Hidden;
                     btnDebugView.Visibility = Visibility.Hidden;
-                    btnReadGuitar.Visibility = Visibility.Hidden; // hide the "Read 0xA40008" button by default
                     break;
 
                 case DeviceState.Connected_XInput:
@@ -277,7 +267,6 @@ namespace WiitarThing
 
 #if DEBUG
                     btnDebugView.Visibility = Visibility.Visible;
-                    btnReadGuitar.Visibility = Visibility.Visible; // make the "Read 0xA40008" button visible only when the remote is connected (and only in Debug build)
 #else
                     btnDebugView.Visibility = Visibility.Hidden;
 #endif
@@ -1057,20 +1046,6 @@ namespace WiitarThing
         {
 #if DEBUG
             DebugViewActivate();
-#endif
-        }
-
-        /* In my first attempt to make the Nyko Frontman work with WiitarThing, I added a button to the DeviceControl component
-           that reads 6 bytes from register address 0xa40008 when pressed, then opens a MessageBox showing the Wiimote's response.
-           When I couldn't see any guitar information within the periodically-received data reports, I decided to test out WiiBrew's claim that
-           this information can also be accessed at said address: https://wiibrew.org/wiki/Wiimote/Extension_Controllers/Guitar_Hero_(Wii)_Guitars#:~:text=readable%20at%200xa40008
-           This eventually failed, as the responses did not contain the information as well.
-        */
-        private void btnReadGuitar_Click(object sender, RoutedEventArgs e)
-        {
-#if DEBUG
-            Device._readGuitarInfo = true;
-            Device.ReadMemory(0x04A40008, 6);
 #endif
         }
     }
