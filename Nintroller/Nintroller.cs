@@ -616,9 +616,8 @@ namespace NintrollerLib
                Nevertheless, this function also includes the standard method, in case there are other guitars out there requiring encryption to work,
                whose responses can be decrypted correctly using 0x97.
                To distinguish the Nyko Frontman from those other guitars, we try decrypting the 5th byte using 0x97, then checking if the bits guaranteed to be 1
-               by the format are actually 1. All possible encrypted values sent by the Nyko Frontman won't satisfy this, except for 0xFF (so only if the 5th byte is 0xFF
-               we could have a situation where the Frontman decryption is used to decrypt all bytes sent by another guitar type, but that's the best you can achieve).
-               The 5th byte was chosen because it's very predictable - only 3 of its bits can vary (Down, -, +) so it has the smallest amount of possible values.
+               by the format are actually 1. The 5th byte was chosen because it's very predictable - only 3 of its bits can vary (Down, -, +) so it has the
+               smallest amount of possible values.
             */
             byte decrypted = (byte)(((data[offset + 4] ^ 0x97) + 0x97) & 0xFF);
             bool useCommonValue = (data[offset + 4] != 0xFF) && ((decrypted & 0xAB) == 0xAB);
@@ -629,23 +628,10 @@ namespace NintrollerLib
                 {
                     data[offset + i] = (byte)(((data[offset + i] ^ 0x97) + 0x97) & 0xFF);
                 }
-                else // Nyko Frontman
+                else
                 {
-                    /* HOW I FOUND THE VALUE 0x4D:
-                       The assumption was that the Frontman encrypts its data incorrectly for some reason, but it still uses the transformation:
-                       encrypted_byte = (decrypted_byte - table2[address%8]) ^ table1[address%8].
-                       After diving a little into some implementations of the table generation process used by extension controllers to encrypt their data:
-                       https://github.com/bootsector/wii-retropad-adapter/blob/master/src/wii-retropad-adapter/WMCrypt.cpp
-                       https://github.com/xerpi/fakemote/blob/main/source/wiimote_crypto.c
-                       https://github.com/dolphin-emu/dolphin/blob/master/Source/Core/Core/HW/WiimoteEmu/Encryption.cpp
-                       One can see that if the encryption key is 16 zero bytes, table1 and table2 will be identical, with each one containing 8 identical bytes.
-                       So the guitar uses a single number i such that: encrypted_byte = (decrypted_byte - i) ^ i, for all bytes.
-                       I collected a few examples of encrypted bytes received from the guitar when using specific button combinations, and wrote a script trying
-                       to find the number for which ALL of these encrypted bytes are equal to the result received by encrypting the correctly-formatted bytes matching
-                       them. Meaning, which number the guitar used to take an unencrypted byte representing some button combination and convert it to the byte I received
-                       from it when I actually performed this combination.
-                       Whenever the script returned multiple options, I added another constraint (a byte that still doesn't decrypt correctly).
-                       In the end I was left with 0x4D and 0xCD, which are equivalent (just like 0x17 and 0x97 are equivalent).
+                    /* The Nyko Frontman uses the value 0x4D. Basically I found it by taking some examples of encrypted bytes I got from the guitar which don't decrypt
+                       correctly with 0x97, then trying all possible values until reaching the one that decrypts all of them correctly.
                     */
                     data[offset + i] = (byte)(((data[offset + i] ^ 0x4D) + 0x4D) & 0xFF);
                 }
