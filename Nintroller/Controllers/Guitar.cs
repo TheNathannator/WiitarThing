@@ -66,6 +66,7 @@ namespace NintrollerLib
         public bool IsGH3SetYet { get; private set; }
 
         private byte oldTouchStripValue;
+        private float oldTilt;
 
         public float WhammyHigh;
         public float WhammyLow;
@@ -95,12 +96,14 @@ namespace NintrollerLib
             CALIB_Enable_TouchStrip = false;
 
             oldTouchStripValue = GTR_TOUCH_STRIP_None;
+            oldTilt = 0;
 
             IsGH3SetYet = false;
             IsGH3 = false;
 
             CALIB_Tilt_Neutral = 0;
-            CALIB_Tilt_TiltedREEEE = (float)(Math.PI / 2);
+            CALIB_Tilt_Tilted = (float)(Math.PI / 2);
+            CALIB_Tilt_Weight = 0.35f;
 
 #if DEBUG
             DebugLastData = new byte[] { 0 };
@@ -124,7 +127,8 @@ namespace NintrollerLib
         public bool CALIB_Enable_TouchStrip;
 
         public float CALIB_Tilt_Neutral;
-        public float CALIB_Tilt_TiltedREEEE;
+        public float CALIB_Tilt_Weight;
+        public float CALIB_Tilt_Tilted;
         public float CALIB_Tilt_StartingZ;
 
         private const byte GTR_TOUCH_STRIP_None = 0x0F;
@@ -496,21 +500,17 @@ namespace NintrollerLib
 
                 CALIB_Tilt_StartingZ = 0;
 
-                CALIB_Tilt_Neutral = 0;// (float)Math.Atan2(Math.Abs(wiimote.accelerometer.Y), Math.Abs(wiimote.accelerometer.X)) * Math.Max(Math.Min(1 - Math.Abs(wiimote.accelerometer.Z - CALIB_Tilt_StartingZ), 1), 0);
-
-                CALIB_Tilt_TiltedREEEE = (float)(CALIB_Tilt_Neutral + Math.PI / 2);
+                CALIB_Tilt_Neutral = 0;
             }
-
-            float tiltAngle = (float)Math.Atan2(Math.Abs(wiimote.accelerometer.Y),
-                Math.Abs(wiimote.accelerometer.X)) *
-                Math.Max(Math.Min(1 - Math.Abs(wiimote.accelerometer.Z - CALIB_Tilt_StartingZ), 1), 0);
+            
+            float tiltAngle = (float)Math.Atan(Math.Sqrt(Math.Pow(wiimote.accelerometer.X,2)+ Math.Pow(wiimote.accelerometer.Y,2) / wiimote.accelerometer.Z));
 
             // Tilt calibration max
             if (SpecialButtonTiltCalibMax)
-                CALIB_Tilt_TiltedREEEE = tiltAngle;
+                CALIB_Tilt_Tilted = tiltAngle;
 
-
-            float tilt = _MapRange(tiltAngle, CALIB_Tilt_Neutral, CALIB_Tilt_TiltedREEEE, 0, 1);
+            oldTilt = tiltAngle;
+            float tilt = _MapRange((CALIB_Tilt_Weight * tiltAngle) + ((1 - CALIB_Tilt_Weight) * oldTilt), CALIB_Tilt_Neutral, CALIB_Tilt_Tilted, 0, 1);
 
             TiltHigh = Math.Min(Math.Max(tilt, 0), 1);
             TiltLow = Math.Max(Math.Min(tilt, 0), -1);
