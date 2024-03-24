@@ -871,11 +871,6 @@ namespace NintrollerLib
                                         applyReport = InputReport.ExtOnly;
                                         break;
 
-                                    case ControllerType.BalanceBoard:
-                                        _state = new BalanceBoard();
-                                        applyReport = InputReport.ExtOnly;
-                                        break;
-
                                     case ControllerType.Nunchuk:
                                     case ControllerType.NunchukB:
                                         _state = new Nunchuk(_calibrations.WiimoteCalibration);
@@ -976,19 +971,6 @@ namespace NintrollerLib
 
                                         applyReport = InputReport.BtnsAccExt;
 
-                                        break;
-
-                                    case ControllerType.MotionPlus:
-                                        _state = new WiimotePlus();
-                                        // TODO: Calibration: apply stored motion plus calibration
-                                        if (_irMode == IRCamMode.Off)
-                                        {
-                                            applyReport = InputReport.BtnsAccExt;
-                                        }
-                                        else
-                                        {
-                                            applyReport = InputReport.BtnsAccIRExt;
-                                        }
                                         break;
 
                                     case ControllerType.PartiallyInserted:
