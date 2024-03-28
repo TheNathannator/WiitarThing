@@ -31,7 +31,7 @@
 
   <ItemGroup>
     <Reference Include="System.Runtime.Remoting" />
-    <ProjectReference Include="..\Nintroller\Nintroller.csproj" />
+    <ProjectReference Include="..\Nintroller_old\Nintroller.csproj" />
   </ItemGroup>
 
   <ItemGroup>
