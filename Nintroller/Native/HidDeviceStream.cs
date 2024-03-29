@@ -38,26 +38,35 @@ namespace Nintroller
             _handle = null;
         }
 
+        public static bool GetHardwareIds(string path, out ushort vendorId, out ushort productId)
+        {
+            vendorId = default;
+            productId = default;
+
+            if (!Open(path, exclusive: false, out var handle))
+                return false;
+
+            using (handle)
+            {
+                if (!HidD_GetAttributes(handle, out var attributes))
+                {
+                    Logging.LogWin32Error("Could not get HID attributes");
+                    return false;
+                }
+
+                vendorId = attributes.VendorID;
+                productId = attributes.ProductID;
+                return true;
+            }
+        }
+
         public bool Open(bool exclusive)
         {
             if (_handle != null && !_handle.IsInvalid)
                 return true;
 
-            _handle = CreateFile(
-                _path,
-                (uint) (FILE_SHARE_READ | FILE_SHARE_WRITE),
-                exclusive ? FILE_SHARE_NONE : (FILE_SHARE_READ | FILE_SHARE_WRITE),
-                null,
-                OPEN_EXISTING,
-                FILE_FLAG_OVERLAPPED,
-                null
-            );
-
-            if (_handle == null || _handle.IsInvalid)
-            {
-                Logging.LogWin32Error("Failed to open HID device");
+            if (!Open(_path, exclusive, out _handle))
                 return false;
-            }
 
             if (!HidD_GetPreparsedData(_handle, out var hidData) || hidData.IsNull)
             {
@@ -74,6 +83,27 @@ namespace Nintroller
 
             InputLength = caps.InputReportByteLength;
             OutputLength = caps.OutputReportByteLength;
+
+            return true;
+        }
+
+        private static bool Open(string path, bool exclusive, out SafeFileHandle handle)
+        {
+            handle = CreateFile(
+                path,
+                (uint) (FILE_SHARE_READ | FILE_SHARE_WRITE),
+                exclusive ? FILE_SHARE_NONE : (FILE_SHARE_READ | FILE_SHARE_WRITE),
+                null,
+                OPEN_EXISTING,
+                FILE_FLAG_OVERLAPPED,
+                null
+            );
+
+            if (handle == null || handle.IsInvalid)
+            {
+                Logging.LogWin32Error("Failed to open HID device");
+                return false;
+            }
 
             return true;
         }
