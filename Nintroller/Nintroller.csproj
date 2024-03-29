@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
+
+    <!-- Required for CsWin32 -->
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
