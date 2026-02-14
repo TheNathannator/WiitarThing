@@ -408,7 +408,10 @@ namespace WiitarThing.Holders
         public XInputHolder(ControllerType t) : this()
         {
             Mappings = GetDefaultMapping(t);
+        }
 
+        public void SetType(ControllerType t)
+        {
             switch (t)
             {
                 case ControllerType.Guitar:
@@ -425,6 +428,12 @@ namespace WiitarThing.Holders
                     break;
                 default:
                     break;
+            }
+            if (connected)
+            {
+                int prevID = ID;
+                RemoveXInput(prevID);
+                ConnectXInput(prevID);
             }
         }
 
@@ -536,6 +545,8 @@ namespace WiitarThing.Holders
             {
                 SetMapping(map.Key, map.Value);
             }
+
+            SetType(controller);
         }
 
         public bool ConnectXInput(int id)
@@ -670,7 +681,7 @@ namespace WiitarThing.Holders
             }
         }
 
-        public void Plugin(int id, ushort vid = 0, ushort pid = 0)
+        public void Plugin(int id, ushort vid, ushort pid)
         {
             if (targets.ContainsKey(id))
             {
