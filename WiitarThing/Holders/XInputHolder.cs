@@ -49,6 +49,8 @@ namespace WiitarThing.Holders
         private XBus bus;
         private bool connected;
         private int ID;
+        private ushort vid = 0;
+        private ushort pid = 0;
 
         public static Dictionary<string, string> GetDefaultMapping(ControllerType type)
         {
@@ -406,6 +408,24 @@ namespace WiitarThing.Holders
         public XInputHolder(ControllerType t) : this()
         {
             Mappings = GetDefaultMapping(t);
+
+            switch (t)
+            {
+                case ControllerType.Guitar:
+                    vid = 0x1BAD;
+                    pid = 0x0719;
+                    break;
+                case ControllerType.Drums:
+                    vid = 0x1BAD;
+                    pid = 0x0130;
+                    break;
+                case ControllerType.Turntable:
+                    vid = 0x1430;
+                    pid = 0x1705;
+                    break;
+                default:
+                    break;
+            }
         }
 
         public override void Update()
@@ -529,7 +549,7 @@ namespace WiitarThing.Holders
             availabe[id] = false;
             bus = XBus.Default;
             bus.Unplug(id);
-            bus.Plugin(id);
+            bus.Plugin(id, vid, pid);
             var controller = bus.GetController(id);
             if (controller == null)
             {
