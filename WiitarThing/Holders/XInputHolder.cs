@@ -412,12 +412,12 @@ namespace WiitarThing.Holders
             switch (t)
             {
                 case ControllerType.Guitar:
-                    vid = 0x1BAD;
-                    pid = 0x0719;
+                    vid = 0x1430;
+                    pid = 0x4734;
                     break;
                 case ControllerType.Drums:
-                    vid = 0x1BAD;
-                    pid = 0x0130;
+                    vid = 0x1430;
+                    pid = 0x0805;
                     break;
                 case ControllerType.Turntable:
                     vid = 0x1430;
