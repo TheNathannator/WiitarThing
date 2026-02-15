@@ -49,6 +49,8 @@ namespace WiitarThing.Holders
         private XBus bus;
         private bool connected;
         private int ID;
+        private ushort vid = 0;
+        private ushort pid = 0;
 
         public static Dictionary<string, string> GetDefaultMapping(ControllerType type)
         {
@@ -408,6 +410,33 @@ namespace WiitarThing.Holders
             Mappings = GetDefaultMapping(t);
         }
 
+        public void SetType(ControllerType t)
+        {
+            switch (t)
+            {
+                case ControllerType.Guitar:
+                    vid = 0x1430;
+                    pid = 0x4734;
+                    break;
+                case ControllerType.Drums:
+                    vid = 0x1430;
+                    pid = 0x0805;
+                    break;
+                case ControllerType.Turntable:
+                    vid = 0x1430;
+                    pid = 0x1705;
+                    break;
+                default:
+                    break;
+            }
+            if (connected)
+            {
+                int prevID = ID;
+                RemoveXInput(prevID);
+                ConnectXInput(prevID);
+            }
+        }
+
         public override void Update()
         {
             if (!connected)
@@ -516,6 +545,8 @@ namespace WiitarThing.Holders
             {
                 SetMapping(map.Key, map.Value);
             }
+
+            SetType(controller);
         }
 
         public bool ConnectXInput(int id)
@@ -529,7 +560,7 @@ namespace WiitarThing.Holders
             availabe[id] = false;
             bus = XBus.Default;
             bus.Unplug(id);
-            bus.Plugin(id);
+            bus.Plugin(id, vid, pid);
             var controller = bus.GetController(id);
             if (controller == null)
             {
@@ -650,7 +681,7 @@ namespace WiitarThing.Holders
             }
         }
 
-        public void Plugin(int id, ushort vid = 0, ushort pid = 0)
+        public void Plugin(int id, ushort vid, ushort pid)
         {
             if (targets.ContainsKey(id))
             {
