@@ -637,7 +637,9 @@ namespace NintrollerLib
                 }
             }
 
+#if DEBUG // explicit check here to avoid constant garbage allocations in release
             Log("Decrypted guitar bytes: " + BitConverter.ToString(data, offset, 6));
+#endif
         }
         #endregion
 
@@ -1060,7 +1062,8 @@ namespace NintrollerLib
                        Based on observations with the Nyko Frontman, the fastest way to recover from this is to abort the encryption setup, wait for
                        the next status report (which will have extension controller bit = 1) and start over.
                     */
-                    if (_ackType.ToString().StartsWith("EncryptionSetup") && report[4] != 0x00)
+
+                    if (_ackType.IsEncryptionAck() && report[4] != 0x00)
                     {
                         _ackType = (AcknowledgementType)((int)_ackType - 1); // the current _ackType is already the step following the one that failed, so we take it back
                         Log(_ackType.ToString() + " failed with error code " + report[4].ToString() + ". Aborting");
@@ -1293,7 +1296,7 @@ namespace NintrollerLib
                     if (_state != null && _currentType != ControllerType.Unknown)
                     {
                         // ignoring input reports arriving while guitar encryption is being set up
-                        if (_ackType.ToString().StartsWith("EncryptionSetup"))
+                        if (_ackType.IsEncryptionAck())
                         {
                             break;
                         }
@@ -1327,19 +1330,32 @@ namespace NintrollerLib
                             {
                                 GuitarDecryptBuffer(report, offset); // modify the report to contain decrypted guitar bytes
                             }
-                            else if (BitConverter.ToString(report, offset, 6) == "00-00-00-00-00-00") // checking this only if _encryptionEnabled=false
+                            else
                             {
-                                /* ASSUMPTION: if all guitar bytes are zero, it means the guitar will send its real data only after setting up encryption
-                                   as described here: https://wiibrew.org/wiki/Wiimote/Extension_Controllers#Encryption_setup
-                                   This conclusion was reached by sniffing Bluetooth traffic while playing Guitar Hero 3 on the Dolphin emulator with
-                                   the Nyko Frontman guitar (where it worked just fine, hence why the capture was performed - to find out how).
-                                   Note: the real guitar data can never be 6 zero bytes, based on the known format (which applies here since the received report
-                                   is not encrypted): https://wiibrew.org/wiki/Wiimote/Extension_Controllers/Guitar_Hero_(Wii)_Guitars#Data_Format
-                                */
-                                _ackType = AcknowledgementType.EncryptionSetup_Step1;
-                                WriteToMemory(Constants.REGISTER_EXTENSION_INIT_1, new byte[] { 0xAA }); // step 0 - write 0xAA to register 0xF0
-                                return;
-                                // continue other steps in Acknowledgement Reporting
+                                bool allZero = true;
+                                for (int i = offset; i < offset + 6; i++)
+                                {
+                                    if (report[i] != 0)
+                                    {
+                                        allZero = false;
+                                        break;
+                                    }
+                                }
+
+                                if (allZero) // checking this only if _encryptionEnabled=false
+                                {
+                                    /* ASSUMPTION: if all guitar bytes are zero, it means the guitar will send its real data only after setting up encryption
+                                    as described here: https://wiibrew.org/wiki/Wiimote/Extension_Controllers#Encryption_setup
+                                    This conclusion was reached by sniffing Bluetooth traffic while playing Guitar Hero 3 on the Dolphin emulator with
+                                    the Nyko Frontman guitar (where it worked just fine, hence why the capture was performed - to find out how).
+                                    Note: the real guitar data can never be 6 zero bytes, based on the known format (which applies here since the received report
+                                    is not encrypted): https://wiibrew.org/wiki/Wiimote/Extension_Controllers/Guitar_Hero_(Wii)_Guitars#Data_Format
+                                    */
+                                    _ackType = AcknowledgementType.EncryptionSetup_Step1;
+                                    WriteToMemory(Constants.REGISTER_EXTENSION_INIT_1, new byte[] { 0xAA }); // step 0 - write 0xAA to register 0xF0
+                                    return;
+                                    // continue other steps in Acknowledgement Reporting
+                                }
                             }
                         }
 
@@ -1715,7 +1731,7 @@ namespace NintrollerLib
     /// <summary>
     /// Class for controller state update.
     /// </summary>
-    public class NintrollerStateEventArgs : EventArgs
+    public struct NintrollerStateEventArgs
     {
         /// <summary>
         /// The controller type being updated.

@@ -113,4 +113,23 @@
         IR_Enable,
         DiscoverExtension
     }
+
+    internal static class EnumeratorExtensions
+    {
+        public static bool IsEncryptionAck(this AcknowledgementType ackType)
+        {
+            switch (ackType)
+            {
+                case AcknowledgementType.EncryptionSetup_Step0:
+                case AcknowledgementType.EncryptionSetup_Step1:
+                case AcknowledgementType.EncryptionSetup_Step2:
+                case AcknowledgementType.EncryptionSetup_Step3:
+                case AcknowledgementType.EncryptionSetup_Step4:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+    }
 }
