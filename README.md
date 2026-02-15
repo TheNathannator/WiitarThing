@@ -103,7 +103,7 @@ If you have any questions or issues not addressed in this readme, join the [offi
 
 ### Using with Guitar Hero 3/Aerosmith/World Tour PC
 
-WiitarThing will not work directly for the PC versions of Guitar Hero 3, Aerosmith, or World Tour. This is because WiitarThing emulates a standard Xbox 360 *gamepad*, and cannot currently emulate an Xbox 360 *guitar* directly. To work around this, you can use the v3.x version of [x360ce](https://www.x360ce.com/) alongside WiitarThing to make the game see an Xbox 360 guitar instead.
+WiitarThing will not work directly for the PC versions of Guitar Hero 3, Aerosmith, or World Tour. This is because WiitarThing emulates a standard Xbox 360 *gamepad*, and cannot currently emulate an Xbox 360 *guitar* directly. To work around this, you can use [xinputemu](https://github.com/sanjay900/xinputemu) alongside WiitarThing to make the game see an Xbox 360 guitar instead.
 
 ## Credits
 
